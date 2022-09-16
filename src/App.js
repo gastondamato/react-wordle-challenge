@@ -226,7 +226,7 @@ export default function App() {
 
   function getValidateWord() {
     let triedWord = "";
-    for (let i = 0; i < actualLetters.length; i++) {
+    for (let i = actualLetters.length - 5; i < actualLetters.length; i++) {
       triedWord += actualLetters[i].letter;
     }
     return triedWord;
