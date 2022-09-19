@@ -5,14 +5,14 @@
 .box-container {
   display: flex;
   justify-content: space-around;
-  width: 340px;
-  height: 410px;
+  width: 305px;
+  height: 400px;
   margin: 0 auto;
   flex-wrap: wrap;
 }
 .box {
-  width: 65px;
-  height: 65px;
+  width: 57px;
+  height: 57px;
   border: 1px solid gray;
   border-radius: 10px;
   color: white;
@@ -22,20 +22,40 @@
   justify-content: center;
 }
 
+.largebox {
+  margin-top: 0;
+  padding: 10px;
+  border: 1px solid gray;
+  border-radius: 10px;
+  color: white;
+  font-size: 2em;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.definition {
+  margin: 0 10px 30px 10px;
+  width: 70%;
+}
+
 .guess {
   background-color: rgb(204, 204, 204);
 }
 
-.correct {
-  background-color: rgb(126, 194, 16);
+.simple-keyboard.hg-layout-default .hg-button.wrong,
+.wrong {
+  background-color: rgb(230, 87, 77);
 }
 
+.simple-keyboard.hg-layout-default .hg-button.close,
 .close {
   background-color: rgb(236, 189, 59);
 }
 
-.wrong {
-  background-color: rgb(230, 87, 77);
+.simple-keyboard.hg-layout-default .hg-button.correct,
+.correct {
+  background-color: rgb(126, 194, 16);
 }
 
 .green {
@@ -86,4 +106,16 @@
   border: 2px solid #ccc;
   border-top-color: #000;
   animation: spinner 0.6s linear infinite;
+}
+
+button {
+  padding: 10px 20px;
+  border-radius: 10px;
+  background-color: lightblue;
+  border: none;
+}
+
+button:hover {
+  background-color: lightskyblue;
+  color: white;
 }
