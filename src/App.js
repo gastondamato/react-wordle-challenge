@@ -260,11 +260,13 @@ export default function App() {
         <TryAgain word={getValidateWord()} fncontinue={continueGuessing} />
       )}
       {won.current && <Confetti />}
-      {won.current && <Winner times={lineCounter} />}
+      {won.current && (
+        <Winner word={wordOfTheDay} times={lineCounter.current} />
+      )}
       {loose.current && <Looser word={wordOfTheDay} def={definition} />}
       {!wordOfTheDay && <Loading />}
       <h1>WORDLE CLONE</h1>
-      <CreateTemplate value={actualLetters} />
+      <CreateTemplate value={actualLetters} line={lineCounter.current} />
       <Keyboard
         onKeyPress={onKeyPress}
         display={{
