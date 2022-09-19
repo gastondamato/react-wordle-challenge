@@ -19,9 +19,13 @@ export default function App() {
   const [wordMap, setWordMap] = useState({});
   const [validateWord, setValidateWord] = useState("");
   const [tryAgain, setTryAgain] = useState(false);
+  const [definition, setDefinition] = useState("");
   const lineCounter = useRef(1);
   const won = useRef(false);
   const loose = useRef(false);
+  const historycorrect = useRef("");
+  const historywrong = useRef("");
+  const historyclose = useRef("");
 
   const wordValidationInProgress = useRef(false);
 
@@ -42,7 +46,7 @@ export default function App() {
       .then((data) => {
         createWordArray(data.word.toUpperCase());
       })
-      .catch(function (error) {
+      .catch((error) => {
         console.log("Request failed", error.name);
       });
   }, []);
@@ -57,10 +61,23 @@ export default function App() {
       .then((data) => {
         isValid(data.validWord);
       })
-      .catch(function (error) {
+      .catch((error) => {
         console.log("Request failed", error.name);
       });
   }, [validateWord]);
+
+  function getDefinition(word) {
+    const url = "https://api.dictionaryapi.dev/api/v2/entries/en/" + word;
+    fetch(url)
+      .then((res) => res.json())
+      .then((data) => {
+        console.log(data[0].meanings[0].definitions[0].definition);
+        setDefinition(data[0].meanings[0].definitions[0].definition);
+      })
+      .catch((error) => {
+        console.log("Definition failed", error.name);
+      });
+  }
 
   function createWordArray(word) {
     setWordOfTheDay(word);
@@ -114,6 +131,7 @@ export default function App() {
         youWin++;
         tempArr[i + offset].status = "correct";
         tempMap[tempArr[i + offset].letter]--;
+        historycorrect.current += tempArr[i + offset].letter + " ";
       }
     }
 
@@ -126,18 +144,22 @@ export default function App() {
       ) {
         tempArr[i + offset].status = "close";
         tempMap[tempArr[i + offset].letter]--;
+        historyclose.current += tempArr[i + offset].letter + " ";
       } else {
         tempArr[i + offset].status = "wrong";
+        historywrong.current += tempArr[i + offset].letter + " ";
+        console.log(historywrong.current);
       }
     }
 
     setActualLetters(tempArr);
     if (youWin === MAX_LENGHT) {
       won.current = true;
-      //alert(`YOU WIN!\nIt too you ${lineCounter} tries...`);
+      //alert(`YOU WIN!\nIt tooke you ${lineCounter} tries...`);
     }
     if (lineCounter.current === MAX_LINE_COUNTER + 1 && youWin < MAX_LENGHT) {
       //alert("LOOOOOOSSERRR! \nThe Word Was:\n" + wordOfTheDay);
+      getDefinition(wordOfTheDay);
       loose.current = true;
     }
   }
@@ -163,13 +185,13 @@ export default function App() {
     setValidateWord("");
 
     if (isValidWord) {
+      wordValidationInProgress.current = false;
       enterWorld();
     } else {
       lineCounter.current--;
       //alert("This is not a valid word... \nTry another one");
       setTryAgain(true);
     }
-    wordValidationInProgress.current = false;
   }
 
   function checkEventKey(event) {
@@ -179,8 +201,7 @@ export default function App() {
         deleteLetter();
         break;
       case "Enter":
-        checkValidWord();
-        //enterWorld();
+        if (!wordValidationInProgress.current) checkValidWord();
         break;
       default:
         if (isLetter(event.key)) {
@@ -189,13 +210,13 @@ export default function App() {
     }
   }
 
-  onKeyPress = (button) => {
+  const onKeyPress = (button) => {
     switch (button) {
       case "{bksp}":
         deleteLetter();
         break;
       case "{enter}":
-        checkValidWord();
+        if (!wordValidationInProgress.current) checkValidWord();
         //enterWorld();
         break;
       default:
@@ -220,7 +241,7 @@ export default function App() {
   }
 
   function continueGuessing() {
-    console.log("continue");
+    wordValidationInProgress.current = false;
     setTryAgain(false);
   }
 
@@ -239,21 +260,39 @@ export default function App() {
         <TryAgain word={getValidateWord()} fncontinue={continueGuessing} />
       )}
       {won.current && <Confetti />}
-      {won.current && <Winner />}
-      {loose.current && <Looser />}
+      {won.current && <Winner times={lineCounter} />}
+      {loose.current && <Looser word={wordOfTheDay} def={definition} />}
       {!wordOfTheDay && <Loading />}
       <h1>WORDLE CLONE</h1>
       <CreateTemplate value={actualLetters} />
       <Keyboard
-        onChange={this.onChange}
-        onKeyPress={this.onKeyPress}
+        onKeyPress={onKeyPress}
+        display={{
+          "{bksp}": "⌫",
+          "{enter}": "↩"
+        }}
         layout={{
           default: [
             "Q W E R T Y U I O P {bksp}",
             "A S D F G H J K L {enter}",
-            "Z X C V B N M   "
+            "Z X C V B N M {____________}"
           ]
         }}
+        buttonTheme={[
+          {
+            class: "close",
+            buttons: `${historyclose.current}`
+          },
+
+          {
+            class: "wrong",
+            buttons: `${historywrong.current}`
+          },
+          {
+            class: "correct",
+            buttons: `${historycorrect.current}`
+          }
+        ]}
       />
     </div>
   );
