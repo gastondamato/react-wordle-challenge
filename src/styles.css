@@ -1,3 +1,13 @@
+:root {
+  --logoGradient25: rgb(230, 87, 77);
+  --logoGradient75: rgb(126, 194, 16);
+}
+* {
+  margin: 0;
+}
+body {
+  background-color: #ececec;
+}
 .App {
   font-family: sans-serif;
   text-align: center;
@@ -49,7 +59,7 @@
 }
 
 .doScale {
-  z-index: 2;
+  z-index: 0;
   animation-name: scale;
   animation-duration: 0.5s;
 }
@@ -73,6 +83,16 @@
   background-color: rgb(126, 194, 16);
 }
 
+.react-simple-keyboard.simple-keyboard.hg-theme-default.hg-layout-default {
+  position: fixed;
+  bottom: 10px;
+  left: 0;
+}
+
+canvas.confetti {
+  z-index: 2;
+}
+
 .green {
   color: rgb(126, 194, 16);
 }
@@ -85,12 +105,18 @@
 .looser,
 .winner,
 .tryagain {
-  z-index: 1000;
+  z-index: 1;
+  position: absolute;
+  top: 0;
   display: flex;
   flex-direction: column;
   align-items: center;
   justify-content: center;
   height: 100vh;
+}
+
+.loading h2 {
+  width: 100vw;
 }
 
 .checking,
@@ -134,4 +160,57 @@ button {
 button:hover {
   background-color: lightskyblue;
   color: white;
+}
+
+h1,
+h2,
+p {
+  padding-top: 10px;
+  padding-bottom: 5px;
+}
+
+nav {
+  background-color: lightgray;
+}
+
+nav ul {
+  flex-direction: row;
+  justify-content: space-between;
+  align-items: center;
+  display: flex;
+  padding: 5px;
+}
+
+nav h1 {
+  padding: 0;
+  margin: 0;
+}
+
+ul li {
+  text-decoration: none;
+  list-style: none;
+  padding: 0;
+  margin: 0;
+}
+
+.text-gradient {
+  background: linear-gradient(
+    to right,
+    var(--logoGradient25) 25%,
+    var(--logoGradient75) 100%
+  );
+  background-image: linear-gradient(
+    45deg,
+    var(--logoGradient25) 25%,
+    var(--logoGradient75)
+  );
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  -moz-background-clip: text;
+  -moz-text-fill-color: transparent;
+}
+
+.test-gradient-blur {
+  text-shadow: 0 0 50px var(--logoGradient25), 0 0 100px var(--logoGradient25),
+    0 0 150px var(--logoGradient25), 0 0 200px var(--logoGradient25);
 }
