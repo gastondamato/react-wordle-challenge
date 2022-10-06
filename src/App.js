@@ -3,6 +3,7 @@ import Confetti from "react-confetti";
 import Keyboard from "react-simple-keyboard";
 import "react-simple-keyboard/build/css/index.css";
 import CreateTemplate from "./components/CreateTemplate";
+import Nav from "./components/Nav";
 import Loading from "./components/Loading";
 import Checking from "./components/Checking";
 import Winner from "./components/Winner";
@@ -13,19 +14,25 @@ import "./styles.css";
 export default function App() {
   const MAX_LENGHT = 5;
   const MAX_LINE_COUNTER = 6;
-  const [actualLetters, setActualLetters] = useState([]);
-  const [wordOfTheDay, setWordOfTheDay] = useState("");
-  const [wordArray, setWordArray] = useState("");
-  const [wordMap, setWordMap] = useState({});
-  const [validateWord, setValidateWord] = useState("");
-  const [tryAgain, setTryAgain] = useState(false);
-  const [definition, setDefinition] = useState("");
-  const lineCounter = useRef(1);
-  const won = useRef(false);
-  const loose = useRef(false);
-  const historycorrect = useRef("");
-  const historywrong = useRef("");
-  const historyclose = useRef("");
+  const SECONDS = 1000;
+  const INITIAL_TIME = 5 * SECONDS;
+
+  const [actualLetters, setActualLetters] = useState([]); //containes all the accepted and not yet accepted letters
+  const [wordOfTheDay, setWordOfTheDay] = useState(""); //guess what it contains
+  const [wordArray, setWordArray] = useState(""); //the word letter by letter
+  const [wordMap, setWordMap] = useState({}); //a set of the wordArray and how many times the letter is repeated...
+  const [validateWord, setValidateWord] = useState(""); //true or false if the word is valid
+  const [tryAgain, setTryAgain] = useState(false); //if is not a valid word, try again renders
+  const [definition, setDefinition] = useState(""); //fetch the definition of the word of the day
+  const [msg, setMsg] = useState("Try a 5 letter word...");
+  const [points, setPoints] = useState(0);
+  const [speed, setSpeed] = useState(1000); //one second in ms
+  const lineCounter = useRef(1); //counts in which line
+  const won = useRef(false); //true if you win
+  const loose = useRef(false); //true if you loose
+  const historycorrect = useRef(""); //all the guess letters marked as correct - for the keyboard
+  const historywrong = useRef(""); //all the guess letters marked as wrong
+  const historyclose = useRef(""); //all the guess letters marked as close
 
   const wordValidationInProgress = useRef(false);
 
@@ -35,6 +42,7 @@ export default function App() {
 
   useEffect(() => {
     document.addEventListener("keydown", checkEventKey);
+
     return () => {
       document.removeEventListener("keydown", checkEventKey);
     };
@@ -120,6 +128,15 @@ export default function App() {
     let offset = (0 + lineCounter.current - 1) * MAX_LENGHT - 5;
 
     let youWin = 0;
+    let close = 0;
+    let wrong = 0;
+
+    const formula = (youWin, close, wrong) => {
+      youWin *= Math.floor(100 / lineCounter.current);
+      close *= Math.floor(50 / lineCounter.current);
+      //wrong *= 5 * lineCounter.current;
+      return Math.floor((youWin + close) / lineCounter.current);
+    };
 
     //clone wordMap object into tempMap
     const tempMap = {};
@@ -145,16 +162,38 @@ export default function App() {
         tempArr[i + offset].status = "close";
         tempMap[tempArr[i + offset].letter]--;
         historyclose.current += tempArr[i + offset].letter + " ";
+        close++;
       } else {
         tempArr[i + offset].status = "wrong";
         historywrong.current += tempArr[i + offset].letter + " ";
         console.log(historywrong.current);
+        wrong++;
       }
+    }
+
+    setPoints((oldpoints) => oldpoints + formula(youWin, close, wrong));
+
+    console.log(points + formula(youWin, close, wrong));
+
+    //msgs
+    if (wrong === 5) {
+      setMsg("Good guess! hahaha");
+    } else if (close === 1 || youWin === 1) {
+      setMsg("you can do better...");
+    } else if (close === 2 || youWin === 2) {
+      setMsg("well, well, well...");
+    } else if (youWin === 3) {
+      setMsg("easy rider!");
+    } else if (youWin === 4) {
+      setMsg("mmm close...");
+    } else if (youWin === 5) {
+      setMsg("clap clap clap");
     }
 
     setActualLetters(tempArr);
     if (youWin === MAX_LENGHT) {
       won.current = true;
+      getDefinition(wordOfTheDay);
       //alert(`YOU WIN!\nIt tooke you ${lineCounter} tries...`);
     }
     if (lineCounter.current === MAX_LINE_COUNTER + 1 && youWin < MAX_LENGHT) {
@@ -185,6 +224,8 @@ export default function App() {
     setValidateWord("");
 
     if (isValidWord) {
+      //the word is valid... increese speed of the counter!
+      setSpeed((oldSpeed) => Math.floor(oldSpeed / 1.5));
       wordValidationInProgress.current = false;
       enterWorld();
     } else {
@@ -195,12 +236,14 @@ export default function App() {
   }
 
   function checkEventKey(event) {
+    if (tryAgain) return; //event key will not be allow if the tryAgain modal is on
     const action = event.key;
     switch (action) {
       case "Backspace":
         deleteLetter();
         break;
       case "Enter":
+        console.log("enter into checkEventKey");
         if (!wordValidationInProgress.current) checkValidWord();
         break;
       default:
@@ -255,17 +298,26 @@ export default function App() {
 
   return (
     <div className="App">
+      {won.current && <Confetti zIndex={2000} className="confetti" />}
+      <Nav points={points} speed={speed} />
       {wordValidationInProgress.current && <Checking />}
       {tryAgain && (
         <TryAgain word={getValidateWord()} fncontinue={continueGuessing} />
       )}
-      {won.current && <Confetti />}
+
       {won.current && (
-        <Winner word={wordOfTheDay} times={lineCounter.current} />
+        <Winner
+          word={wordOfTheDay}
+          times={lineCounter.current}
+          def={definition}
+          points={points}
+        />
       )}
-      {loose.current && <Looser word={wordOfTheDay} def={definition} />}
+      {loose.current && (
+        <Looser word={wordOfTheDay} def={definition} points={points} />
+      )}
       {!wordOfTheDay && <Loading />}
-      <h1>WORDLE CLONE</h1>
+      <h2 className="msg text-gradient">{msg}</h2>
       <CreateTemplate value={actualLetters} line={lineCounter.current} />
       <Keyboard
         onKeyPress={onKeyPress}
