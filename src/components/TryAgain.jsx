@@ -1,4 +1,20 @@
+import React, { useEffect } from "react";
+
 export default function TryAgain({ word, fncontinue }) {
+  function handleKeyDown(event) {
+    if (event.key === "Enter") {
+      console.log("enter from TryAgain");
+      event.stopPropagation();
+      return fncontinue();
+    }
+  }
+  useEffect(() => {
+    document.addEventListener("keydown", handleKeyDown);
+    return () => {
+      document.removeEventListener("keydown", handleKeyDown);
+    };
+  }, []);
+
   return (
     <section className="tryagain">
       <h2 className="red">{word} is not a word...</h2>
