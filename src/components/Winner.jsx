@@ -2,7 +2,7 @@ import React, { useEffect } from "react";
 
 export default function Winner({ word, times, def, points }) {
   function refreshPage(event) {
-    if (event.key === "Enter") {
+    if (event.key === "Enter" || event.type === "click") {
       window.location.reload(false);
     }
   }
