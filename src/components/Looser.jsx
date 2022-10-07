@@ -2,7 +2,8 @@ import React, { useEffect } from "react";
 
 export default function Looser({ word, def, points }) {
   function refreshPage(event) {
-    if (event.key === "Enter") {
+    console.log(event.type);
+    if (event.key === "Enter" || event.type === "click") {
       window.location.reload(false);
     }
   }
