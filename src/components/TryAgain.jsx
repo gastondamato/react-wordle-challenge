@@ -2,8 +2,7 @@ import React, { useEffect } from "react";
 
 export default function TryAgain({ word, fncontinue }) {
   function handleKeyDown(event) {
-    if (event.key === "Enter") {
-      console.log("enter from TryAgain");
+    if (event.key === "Enter" || event.type === "click") {
       event.stopPropagation();
       return fncontinue();
     }
